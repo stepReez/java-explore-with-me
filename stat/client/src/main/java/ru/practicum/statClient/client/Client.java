@@ -1,11 +1,11 @@
-package ru.practicum.client;
+package ru.practicum.statClient.client;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-import ru.practicum.dto.HitDto;
-import ru.practicum.dto.ViewStatsDto;
+import ru.practicum.statDto.dto.HitDto;
+import ru.practicum.statDto.dto.ViewStatsDto;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;

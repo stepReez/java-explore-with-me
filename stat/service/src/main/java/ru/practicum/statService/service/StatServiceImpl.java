@@ -1,23 +1,22 @@
-package ru.practicum.service;
+package ru.practicum.statService.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
-import ru.practicum.dto.HitDto;
-import ru.practicum.dto.ViewStatsDto;
-import ru.practicum.model.Hit;
-import ru.practicum.repository.HitRepository;
-import ru.practicum.util.HitMapper;
-import ru.practicum.util.Mapper;
-import ru.practicum.util.Queries;
+import ru.practicum.statDto.dto.HitDto;
+import ru.practicum.statDto.dto.ViewStatsDto;
+import ru.practicum.statService.model.Hit;
+import ru.practicum.statService.repository.HitRepository;
+import ru.practicum.statService.util.HitMapper;
+import ru.practicum.statService.util.Mapper;
+import ru.practicum.statService.util.Queries;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service

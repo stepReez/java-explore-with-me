@@ -1,4 +1,4 @@
-package ru.practicum.controller;
+package ru.practicum.statService.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.dto.HitDto;
-import ru.practicum.dto.ViewStatsDto;
-import ru.practicum.service.StatService;
+import ru.practicum.statDto.dto.HitDto;
+import ru.practicum.statDto.dto.ViewStatsDto;
+import ru.practicum.statService.service.StatService;
 
 import java.util.List;
 

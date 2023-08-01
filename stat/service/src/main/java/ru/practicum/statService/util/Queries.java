@@ -1,4 +1,4 @@
-package ru.practicum.util;
+package ru.practicum.statService.util;
 
 public class Queries {
     public static final String SELECT_UNIQUE_STATS_WITH_URIS = "SELECT app, uri, count(DISTINCT ip) AS hits_count " +

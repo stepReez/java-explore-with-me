@@ -1,4 +1,4 @@
-package ru.practicum.dto;
+package ru.practicum.statDto.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,10 +11,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class ViewStatsDto {
+public class HitDto {
+    private long id;
+
     private String app;
 
     private String uri;
 
-    private long hits;
+    private String ip;
+
+    private String timestamp;
 }

@@ -1,6 +1,6 @@
-package ru.practicum.util;
+package ru.practicum.statService.util;
 
-import ru.practicum.dto.ViewStatsDto;
+import ru.practicum.statDto.dto.ViewStatsDto;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
