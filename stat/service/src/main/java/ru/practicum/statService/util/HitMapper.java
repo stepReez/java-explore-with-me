@@ -14,7 +14,7 @@ public class HitMapper {
                 .app(hitDto.getApp())
                 .timeStamp(LocalDateTime.parse(
                         hitDto.getTimestamp(),
-                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                        DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)
                 ))
                 .ip(hitDto.getIp())
                 .build();
@@ -25,7 +25,7 @@ public class HitMapper {
                 .id(hit.getId())
                 .uri(hit.getUri())
                 .app(hit.getApp())
-                .timestamp(hit.getTimeStamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .timestamp(hit.getTimeStamp().format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)))
                 .ip(hit.getIp())
                 .build();
     }

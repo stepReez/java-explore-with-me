@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+import ru.practicum.statClient.util.Constants;
 import ru.practicum.statDto.dto.HitDto;
 import ru.practicum.statDto.dto.ViewStatsDto;
 
@@ -19,12 +20,12 @@ public class Client {
     private final RestTemplate restTemplate;
 
     public HitDto postHit(String app, String uri, String ip, LocalDateTime timeStamp) {
-        String resourceUrl = "http://localhost:9090/hit";
+        String resourceUrl = Constants.URL  + "/hit";
         HitDto hitDto = HitDto.builder()
                 .app(app)
                 .uri(uri)
                 .ip(ip)
-                .timestamp(timeStamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .timestamp(timeStamp.format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)))
                 .build();
         HttpEntity<HitDto> request = new HttpEntity<>(hitDto);
         HitDto response = restTemplate.postForObject(resourceUrl, request, HitDto.class);
@@ -33,14 +34,15 @@ public class Client {
 
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, ArrayList<String> uris, boolean unique) {
         String startDate = URLEncoder.encode(start.format(
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)),
                 StandardCharsets.UTF_8);
 
         String endDate = URLEncoder.encode(end.format(
-                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                        DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)),
                 StandardCharsets.UTF_8);
 
-        StringBuilder resourceUrl = new StringBuilder("http://localhost:9090/stats?");
+        StringBuilder resourceUrl = new StringBuilder(Constants.URL);
+        resourceUrl.append("/stats?");
         resourceUrl.append(String.format("start=%s", startDate));
         resourceUrl.append(String.format("&end=%s", endDate));
         uris.forEach(u -> resourceUrl.append(String.format("&uris=%s",

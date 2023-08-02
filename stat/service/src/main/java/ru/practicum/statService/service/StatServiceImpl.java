@@ -9,6 +9,7 @@ import ru.practicum.statDto.dto.HitDto;
 import ru.practicum.statDto.dto.ViewStatsDto;
 import ru.practicum.statService.model.Hit;
 import ru.practicum.statService.repository.HitRepository;
+import ru.practicum.statService.util.Constants;
 import ru.practicum.statService.util.HitMapper;
 import ru.practicum.statService.util.Mapper;
 import ru.practicum.statService.util.Queries;
@@ -39,11 +40,11 @@ public class StatServiceImpl implements StatService {
     public List<ViewStatsDto> getStats(String start, String end, List<String> uris, boolean unique) {
         LocalDateTime startDate = LocalDateTime.parse(
                 URLDecoder.decode(start, StandardCharsets.UTF_8),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)
         );
         LocalDateTime endDate = LocalDateTime.parse(
                 URLDecoder.decode(end, StandardCharsets.UTF_8),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)
         );
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
