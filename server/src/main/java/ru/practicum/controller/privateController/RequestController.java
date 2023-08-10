@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.request.ParticipationRequestDto;
+import ru.practicum.service.RequestService;
 
 import java.util.List;
 
@@ -12,20 +13,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RequestController {
 
+    private final RequestService requestService;
+
     @GetMapping
     public List<ParticipationRequestDto> getParticipationRequest(@PathVariable long userId) {
-        return null;
+        return requestService.getParticipationRequest(userId);
     }
 
     @PostMapping
     public ParticipationRequestDto createParticipationRequest(@PathVariable long userId,
                                                               @RequestParam long eventId) {
-        return null;
+        return requestService.createParticipationRequest(userId, eventId);
     }
 
     @PatchMapping("/{requestId}/cancel")
     public ParticipationRequestDto cancelParticipationRequest(@PathVariable long userId,
                                                               @PathVariable long requestId) {
-        return null;
+        return requestService.createParticipationRequest(userId, requestId);
     }
 }

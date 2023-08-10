@@ -10,6 +10,7 @@ import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.practicum.dto.request.EventRequestStatusUpdateResult;
 import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.dto.request.UpdateEventUserRequest;
+import ru.practicum.service.EventService;
 
 import java.util.List;
 
@@ -18,42 +19,44 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EventController {
 
+    private final EventService eventService;
+
     @GetMapping
     public List<EventShortDto> getEvents(@PathVariable long userId,
                                         @RequestParam(defaultValue = "0") int from,
                                         @RequestParam(defaultValue = "10") int size) {
-        return null;
+        return eventService.getEventsByUser(userId, from, size);
     }
 
     @PostMapping
     public EventFullDto createEvent(@PathVariable long userId,
                                     @RequestBody NewEventDto newEventDto) {
-        return null;
+        return eventService.createEvent(userId, newEventDto);
     }
 
     @GetMapping("/{eventId}")
     public EventFullDto getEvent(@PathVariable long userId,
                                  @PathVariable long eventId) {
-        return null;
+        return eventService.getEventByUser(userId, eventId);
     }
 
     @PatchMapping("/{eventId}")
     public EventFullDto patchEvent(@PathVariable long userId,
                                    @PathVariable long eventId,
                                    @RequestBody UpdateEventUserRequest userRequest) {
-        return null;
+        return eventService.patchEventByUser(userId, eventId, userRequest);
     }
 
     @GetMapping("/{eventId}/requests")
     public List<ParticipationRequestDto> getParticipation(@PathVariable long userId,
                                                           @PathVariable long eventId) {
-        return null;
+        return eventService.getParticipation(userId, eventId);
     }
 
     @PatchMapping("/{eventId}/requests")
     public EventRequestStatusUpdateResult patchParticipation(@PathVariable long userId,
                                                              @PathVariable long eventId,
                                                              @RequestBody EventRequestStatusUpdateRequest statusUpdateRequest) {
-        return null;
+        return eventService.patchParticipation(userId, eventId, statusUpdateRequest);
     }
 }

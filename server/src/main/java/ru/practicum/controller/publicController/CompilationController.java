@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.dto.CompilationDto;
+import ru.practicum.service.CompilationService;
 
 import java.util.List;
 
@@ -15,15 +16,17 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CompilationController {
 
+    private final CompilationService compilationService;
+
     @GetMapping
     public List<CompilationDto> getCompilations(@RequestParam boolean pinned,
                                                 @RequestParam(defaultValue = "0") int from,
                                                 @RequestParam(defaultValue = "10") int size) {
-        return null;
+        return compilationService.getCompilations(pinned, from, size);
     }
 
     @GetMapping("/compId")
     public CompilationDto getCompilation(@PathVariable long compId) {
-        return null;
+        return compilationService.getCompilation(compId);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.dto.EventFullDto;
 import ru.practicum.dto.EventShortDto;
+import ru.practicum.service.EventService;
 import ru.practicum.util.EventsSort;
 
 import java.util.List;
@@ -16,6 +17,8 @@ import java.util.List;
 @RequestMapping(path = "/events")
 @RequiredArgsConstructor
 public class EventController {
+
+    private final EventService eventService;
 
     @GetMapping
     public List<EventShortDto> getEvents(@RequestParam String text,
@@ -27,11 +30,12 @@ public class EventController {
                                          @RequestParam EventsSort sort,
                                          @RequestParam(defaultValue = "0") int from,
                                          @RequestParam(defaultValue = "10") int size) {
-        return null;
+        return eventService.getEventsPublic(text, categories, paid, rangeStart, rangeEnd,
+                                            onlyAvailable, sort, from, size);
     }
 
     @GetMapping("/{id}")
-    public EventFullDto getEvent(@PathVariable long id ) {
-        return null;
+    public EventFullDto getEvent(@PathVariable long id) {
+        return eventService.getEventPublic(id);
     }
 }
