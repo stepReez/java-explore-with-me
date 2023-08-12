@@ -11,24 +11,25 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.util.List;
+import java.time.LocalDateTime;
 
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @Builder
 @Entity
-@Table(name = "compilations")
-public class Compilation {
-    //@ManyToMany
-    private List<Event> events;
-
+@Table(name = "requests")
+public class ParticipationRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private boolean pinned;
+    private LocalDateTime created;
 
-    private String title;
+    private Event event;
+
+    private User requester;
+
+    private String status;
 }

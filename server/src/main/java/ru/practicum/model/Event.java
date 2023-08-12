@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @Entity
+@Table(name = "events")
 public class Event {
     private String annotation;
 
