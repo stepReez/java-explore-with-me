@@ -6,11 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
@@ -27,8 +23,12 @@ public class ParticipationRequest {
 
     private LocalDateTime created;
 
+    @ManyToOne
+    @JoinColumn(name = "event_id")
     private Event event;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User requester;
 
     private String status;

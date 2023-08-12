@@ -1,14 +1,20 @@
 package ru.practicum.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.CategoryDto;
 import ru.practicum.dto.NewCategoryDto;
+import ru.practicum.repository.CategoryRepository;
 import ru.practicum.service.CategoryService;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
+
+    private final CategoryRepository categoryRepository;
+
     @Override
     public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
         return null;

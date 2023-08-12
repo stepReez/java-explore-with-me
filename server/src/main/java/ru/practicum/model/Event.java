@@ -7,11 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.util.EventState;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @AllArgsConstructor
@@ -24,20 +20,27 @@ import java.time.LocalDateTime;
 public class Event {
     private String annotation;
 
+    @ManyToOne
+    @JoinColumn(name = "category_id")
     private Category category;
 
     private LocalDateTime crated;
 
     private String description;
 
+    @Column(name = "event_date")
     private LocalDateTime eventDate;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @ManyToOne
+    @JoinColumn(name = "initiator_id")
     private User initiator;
 
+    @ManyToOne
+    @JoinColumn(name = "location_id")
     private Location location;
 
     private boolean paid;

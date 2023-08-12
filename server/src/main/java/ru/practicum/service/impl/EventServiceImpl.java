@@ -1,10 +1,12 @@
 package ru.practicum.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.EventFullDto;
 import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.NewEventDto;
 import ru.practicum.dto.request.*;
+import ru.practicum.repository.EventRepository;
 import ru.practicum.service.EventService;
 import ru.practicum.util.EventState;
 import ru.practicum.util.EventsSort;
@@ -12,7 +14,11 @@ import ru.practicum.util.EventsSort;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
+
+    private final EventRepository eventRepository;
+
     @Override
     public List<EventFullDto> getEvents(List<Long> users, List<EventState> states, List<Long> categories,
                                         String rangeStart, String rangeEnd, int from, int size) {
