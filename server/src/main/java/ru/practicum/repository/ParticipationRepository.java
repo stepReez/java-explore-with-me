@@ -13,17 +13,17 @@ public interface ParticipationRepository extends JpaRepository<ParticipationRequ
     @Query("SELECT r FROM ParticipationRequest AS r " +
             "JOIN r.requester AS u " +
             "WHERE u.id = ?1")
-    List<ParticipationRequest> findAllByUserId(long userId);
+    List<ParticipationRequest> findAllByUserId(Long userId);
 
     @Query("SELECT r FROM ParticipationRequest AS r " +
             "JOIN r.requester AS u " +
             "JOIN r.event AS e " +
             "WHERE u.id = ?1 " +
             "AND e.id = ?2")
-    List<ParticipationRequest> findAllByUserIdAndEventId(long userId, long eventId);
+    List<ParticipationRequest> findAllByUserIdAndEventId(Long userId, Long eventId);
 
     @Query("SELECT r FROM ParticipationRequest AS r " +
             "JOIN r.event AS e " +
-            "AND e.id = ?1")
-    List<ParticipationRequest> findAllByEventId(long eventId);
+            "WHERE e.id = ?1")
+    List<ParticipationRequest> findAllByEventId(Long eventId);
 }
