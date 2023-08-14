@@ -11,12 +11,15 @@ import ru.practicum.dto.EventShortDto;
 import ru.practicum.service.EventService;
 import ru.practicum.util.EventsSort;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
 @RequestMapping(path = "/events")
 @RequiredArgsConstructor
-public class EventController {
+public class EventPublicController {
 
     private final EventService eventService;
 
@@ -26,10 +29,16 @@ public class EventController {
                                          @RequestParam boolean paid,
                                          @RequestParam String rangeStart,
                                          @RequestParam String rangeEnd,
-                                         @RequestParam boolean onlyAvailable,
+                                         @RequestParam(defaultValue = "false") boolean onlyAvailable,
                                          @RequestParam EventsSort sort,
                                          @RequestParam(defaultValue = "0") int from,
                                          @RequestParam(defaultValue = "10") int size) {
+        if (rangeStart == null || rangeStart.isBlank()) {
+            rangeStart = URLEncoder.encode(String.valueOf(LocalDateTime.now()), StandardCharsets.UTF_8);
+        }
+        if (rangeEnd == null || rangeEnd.isBlank()) {
+            rangeEnd = URLEncoder.encode(String.valueOf(LocalDateTime.MAX), StandardCharsets.UTF_8);
+        }
         return eventService.getEventsPublic(text, categories, paid, rangeStart, rangeEnd,
                                             onlyAvailable, sort, from, size);
     }

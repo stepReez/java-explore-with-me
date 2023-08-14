@@ -5,10 +5,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.WhereJoinTable;
 import ru.practicum.util.EventState;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,7 +26,7 @@ public class Event {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    private LocalDateTime crated;
+    private LocalDateTime created;
 
     private String description;
 
@@ -51,9 +53,17 @@ public class Event {
 
     private boolean requestModeration;
 
+    @Enumerated(EnumType.STRING)
     private EventState state;
 
     private String title;
 
     private long views;
+
+    @WhereJoinTable(clause = "status='CONFIRMED'")
+    @ManyToMany
+    @JoinTable(name = "requests",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id"))
+    List<User> participants;
 }

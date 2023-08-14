@@ -11,7 +11,7 @@ import java.util.List;
 @Controller
 @RequestMapping(path = "/users/{userId}/requests")
 @RequiredArgsConstructor
-public class RequestController {
+public class RequestPrivateController {
 
     private final RequestService requestService;
 
@@ -29,6 +29,6 @@ public class RequestController {
     @PatchMapping("/{requestId}/cancel")
     public ParticipationRequestDto cancelParticipationRequest(@PathVariable long userId,
                                                               @PathVariable long requestId) {
-        return requestService.createParticipationRequest(userId, requestId);
+        return requestService.cancelParticipationRequest(userId, requestId);
     }
 }

@@ -13,11 +13,12 @@ import ru.practicum.dto.request.UpdateEventUserRequest;
 import ru.practicum.service.EventService;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping(path = "/users/{userId}/events")
 @RequiredArgsConstructor
-public class EventController {
+public class EventPrivateController {
 
     private final EventService eventService;
 
@@ -43,7 +44,7 @@ public class EventController {
     @PatchMapping("/{eventId}")
     public EventFullDto patchEvent(@PathVariable long userId,
                                    @PathVariable long eventId,
-                                   @RequestBody UpdateEventUserRequest userRequest) {
+                                   @RequestBody Map<Object, Object> userRequest) {
         return eventService.patchEventByUser(userId, eventId, userRequest);
     }
 

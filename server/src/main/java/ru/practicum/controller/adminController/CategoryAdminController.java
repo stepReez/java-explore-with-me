@@ -10,7 +10,7 @@ import ru.practicum.service.CategoryService;
 @Controller
 @RequestMapping(path = "/admin/categories")
 @RequiredArgsConstructor
-public class CategoryController {
+public class CategoryAdminController {
 
     private final CategoryService categoryService;
 

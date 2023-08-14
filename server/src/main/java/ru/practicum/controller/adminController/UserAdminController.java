@@ -12,7 +12,7 @@ import java.util.List;
 @Controller
 @RequestMapping(path = "/admin/users")
 @RequiredArgsConstructor
-public class UserController {
+public class UserAdminController {
 
     private final UserService userService;
 

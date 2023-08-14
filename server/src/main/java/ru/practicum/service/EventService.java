@@ -8,6 +8,7 @@ import ru.practicum.util.EventState;
 import ru.practicum.util.EventsSort;
 
 import java.util.List;
+import java.util.Map;
 
 public interface EventService {
     List<EventFullDto> getEvents(List<Long> users,
@@ -18,7 +19,7 @@ public interface EventService {
                                  int from,
                                  int size);
 
-    EventFullDto patchEvent(long eventId, UpdateEventAdminRequest updateEvent);
+    EventFullDto patchEvent(long eventId, Map<Object, Object> updateEvent);
 
     List<EventShortDto> getEventsByUser(long userId, int from, int size);
 
@@ -26,7 +27,7 @@ public interface EventService {
 
     EventFullDto getEventByUser(long userId, long eventId);
 
-    EventFullDto patchEventByUser(long userId, long eventId, UpdateEventUserRequest userRequest);
+    EventFullDto patchEventByUser(long userId, long eventId, Map<Object, Object> userRequest);
 
     List<ParticipationRequestDto> getParticipation(long userId,  long eventId);
 
