@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
             users = userRepository.findAll(PageRequest.of(from / size, size))
                     .stream().collect(Collectors.toList());
         } else {
-            users = userRepository.findAllById(ids, PageRequest.of(from / size, size));
+            users = userRepository.findAllById(ids);
         }
         log.info("Users from {} to {} found", from, from + size);
         return users.stream()

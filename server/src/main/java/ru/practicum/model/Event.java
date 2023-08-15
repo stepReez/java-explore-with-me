@@ -47,11 +47,13 @@ public class Event {
 
     private boolean paid;
 
+    @Column(name = "participant_limit")
     private int participantLimit;
 
     @Column(name = "published_on")
     private LocalDateTime publishedOn;
 
+    @Column(name = "moderation")
     private boolean requestModeration;
 
     @Enumerated(EnumType.STRING)
