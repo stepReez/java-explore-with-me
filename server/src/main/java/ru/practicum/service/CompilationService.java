@@ -13,7 +13,7 @@ public interface CompilationService {
 
     CompilationDto patchCompilation(long compId, UpdateCompilationRequest updateCompilationRequest);
 
-    List<CompilationDto> getCompilations(boolean pinned, int from, int size);
+    List<CompilationDto> getCompilations(Boolean pinned, int from, int size);
 
     CompilationDto getCompilation(long compId);
 }

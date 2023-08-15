@@ -4,6 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.request.ParticipationRequestDto;
+import ru.practicum.exceptions.ConflictException;
+import ru.practicum.exceptions.NotFoundException;
+import ru.practicum.model.Event;
 import ru.practicum.model.ParticipationRequest;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.ParticipationRepository;
@@ -37,12 +40,28 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public ParticipationRequestDto createParticipationRequest(long userId, long eventId) {
+        if (!participationRepository.findAllByUserIdAndEventId(userId, eventId).isEmpty()) {
+            throw new ConflictException("Request already exist");
+        }
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Event not found"));
+        if (event.getInitiator().getId() == userId) {
+            throw new ConflictException("Requester can't be initiator");
+        }
+        if (event.getPublishedOn() == null || event.getPublishedOn().isAfter(LocalDateTime.now())) {
+            throw new ConflictException("Event not published");
+        }
+        if (event.getParticipants().size() == event.getParticipantLimit()) {
+            throw new ConflictException("Participation limit reached");
+        }
         ParticipationRequest participationRequest = ParticipationRequest.builder()
                 .created(LocalDateTime.now())
                 .event(eventRepository.findById(eventId).orElseThrow())
                 .requester(userRepository.findById(userId).orElseThrow())
                 .status("PENDING")
                 .build();
+        if (!event.isRequestModeration()) {
+            participationRequest.setStatus("CONFIRMED");
+        }
         ParticipationRequest participationRequestDto = participationRepository.save(participationRequest);
         log.info("Participation requests with id = {} saved", participationRequestDto.getId());
         return ParticipationRequestMapper.toParticipationRequestDto(participationRequestDto);
@@ -50,7 +69,8 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public ParticipationRequestDto cancelParticipationRequest(long userId, long requestId) {
-        ParticipationRequest participationRequest = participationRepository.findById(requestId).orElseThrow();
+        ParticipationRequest participationRequest = participationRepository.findById(requestId).orElseThrow(() ->
+                new NotFoundException("Request not found"));
         if (participationRequest.getRequester().getId() == userId) {
             participationRequest.setStatus("CANCELED");
         }

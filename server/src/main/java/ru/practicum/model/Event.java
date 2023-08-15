@@ -49,6 +49,7 @@ public class Event {
 
     private int participantLimit;
 
+    @Column(name = "published_on")
     private LocalDateTime publishedOn;
 
     private boolean requestModeration;

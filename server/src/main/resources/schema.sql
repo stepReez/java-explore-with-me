@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS events (
   location_id BIGINT,
   paid boolean,
   participant_limit INTEGER,
-  publishedOn TIMESTAMP WITH TIME ZONE,
+  published_on TIMESTAMP WITH TIME ZONE,
   moderation boolean,
   state varchar(16),
   title varchar(128),

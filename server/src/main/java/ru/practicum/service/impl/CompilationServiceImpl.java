@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.CompilationDto;
 import ru.practicum.dto.NewCompilationDto;
 import ru.practicum.dto.request.UpdateCompilationRequest;
+import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.model.Compilation;
 import ru.practicum.model.Event;
 import ru.practicum.repository.CompilationRepository;
@@ -42,6 +43,9 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     @Transactional
     public void deleteCompilation(long compId) {
+        if (compilationRepository.findById(compId).isEmpty()) {
+            throw new NotFoundException("Compilation not found");
+        }
         compilationRepository.deleteById(compId);
         log.info("Compilation with id = {} deleted", compId);
     }
@@ -49,7 +53,8 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     @Transactional
     public CompilationDto patchCompilation(long compId, UpdateCompilationRequest updateCompilationRequest) {
-        Compilation compilation = compilationRepository.findById(compId).orElseThrow(); //todo: exception
+        Compilation compilation = compilationRepository.findById(compId).orElseThrow(() ->
+                new NotFoundException("Compilation not found"));
         patch(compilation, updateCompilationRequest);
         compilation.setId(compId);
         Compilation newCompilation = compilationRepository.save(compilation);
@@ -58,18 +63,25 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public List<CompilationDto> getCompilations(boolean pinned, int from, int size) {
-        List<CompilationDto> compilations = compilationRepository.findAll(PageRequest.of(from / size, size))
-                .stream()
+    public List<CompilationDto> getCompilations(Boolean pinned, int from, int size) {
+        List<Compilation> compilations;
+        if (pinned == null) {
+            compilations = compilationRepository.findAll(PageRequest.of(from / size, size))
+                    .stream().collect(Collectors.toList());
+        } else {
+            compilations = compilationRepository.findAllByPinned(pinned, PageRequest.of(from / size, size))
+                    .stream().collect(Collectors.toList());
+        }
+        log.info("Compilations from {} to {} found", from, from + size);
+        return compilations.stream()
                 .map(CompilationMapper::toCompilationDto)
                 .collect(Collectors.toList());
-        log.info("Compilations from {} to {} found", from, from + size);
-        return compilations;
     }
 
     @Override
     public CompilationDto getCompilation(long compId) {
-        CompilationDto compilationDto = CompilationMapper.toCompilationDto(compilationRepository.findById(compId).orElseThrow());
+        CompilationDto compilationDto = CompilationMapper.toCompilationDto(compilationRepository.findById(compId)
+                .orElseThrow(() -> new NotFoundException(String.format("Compilation with id = %d not found", compId))));
         log.info("Compilation with id = {} found", compId);
         return compilationDto;
     }

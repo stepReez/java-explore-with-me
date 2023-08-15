@@ -20,27 +20,29 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     @Query("SELECT e FROM Event AS e " +
             "JOIN e.category AS c " +
-            "WHERE e.annotation LIKE ?1 " +
-            "OR e.title LIKE ?2 " +
+            "WHERE lower(e.annotation) LIKE %?1% " +
+            "OR lower(e.title) LIKE %?2% " +
             "AND c.id IN ?3 " +
             "AND e.paid LIKE ?4 " +
             "AND e.eventDate > ?5 " +
             "AND e.eventDate < ?6 " +
+            "AND e.publishedOn < ?7" +
             "ORDER BY e.eventDate")
     List<Event> findPublicSortByDate(String text, String text2, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
-                           LocalDateTime rangeEnd, Pageable pageable);
+                           LocalDateTime rangeEnd, LocalDateTime now, Pageable pageable);
 
     @Query("SELECT e FROM Event AS e " +
             "JOIN e.category AS c " +
-            "WHERE e.annotation LIKE ?1 " +
-            "OR e.title LIKE ?2 " +
+            "WHERE lower(e.annotation) LIKE %?1% " +
+            "OR lower(e.title) LIKE %?2% " +
             "AND c.id IN ?3 " +
             "AND e.paid LIKE ?4 " +
             "AND e.eventDate > ?5 " +
             "AND e.eventDate < ?6 " +
+            "AND e.publishedOn < ?7" +
             "ORDER BY e.views DESC")
     List<Event> findPublicSortByViews(String text, String text2, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
-                                     LocalDateTime rangeEnd, Pageable pageable);
+                                     LocalDateTime rangeEnd, LocalDateTime now, Pageable pageable);
 
     @Query("SELECT e FROM Event AS e " +
             "JOIN e.category AS c " +
@@ -52,4 +54,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "AND e.eventDate < ?5")
     List<Event> findAdmin(List<Long> users, List<EventState> states, List<Long> categories,
                           LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable);
+
+    @Query("SELECT e FROM Event AS e " +
+            "JOIN e.category AS c " +
+            "WHERE c.id = ?1")
+    List<Event> findByCategory(Long categoryId, Pageable pageable);
 }
