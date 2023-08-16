@@ -5,12 +5,10 @@ import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.NewEventDto;
 import ru.practicum.model.Category;
 import ru.practicum.model.Event;
-import ru.practicum.model.User;
 import ru.practicum.util.Constants;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 public class EventMapper {
 
@@ -62,6 +60,7 @@ public class EventMapper {
                 .state(event.getState())
                 .title(event.getTitle())
                 .views(event.getViews())
+                .confirmedRequests(event.getParticipants().size())
                 .build();
 
     }

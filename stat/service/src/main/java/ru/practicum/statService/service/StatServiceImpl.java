@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.practicum.statDto.dto.HitDto;
 import ru.practicum.statDto.dto.ViewStatsDto;
+import ru.practicum.statService.exception.BadRequestException;
 import ru.practicum.statService.model.Hit;
 import ru.practicum.statService.repository.HitRepository;
 import ru.practicum.statService.util.Constants;
@@ -47,6 +48,10 @@ public class StatServiceImpl implements StatService {
                 URLDecoder.decode(end, StandardCharsets.UTF_8),
                 DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)
         );
+
+        if (endDate.isBefore(startDate)) {
+            throw new BadRequestException("EndDate cant be before startDate");
+        }
 
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         parameters.addValue("start", startDate);

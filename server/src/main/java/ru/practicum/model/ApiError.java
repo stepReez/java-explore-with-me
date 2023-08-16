@@ -1,6 +1,10 @@
 package ru.practicum.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
 @AllArgsConstructor
@@ -9,11 +13,9 @@ import org.springframework.http.HttpStatus;
 @Setter
 @Builder
 public class ApiError {
-    private String errors;
+    private int code;
 
     private String message;
-
-    private String reason;
 
     private HttpStatus status;
 

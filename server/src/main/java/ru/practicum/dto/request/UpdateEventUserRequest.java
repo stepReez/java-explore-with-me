@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.model.Location;
-import ru.practicum.util.StateActionAdmin;
 import ru.practicum.util.StateActionUser;
 
 import javax.validation.constraints.Size;

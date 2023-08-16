@@ -9,13 +9,16 @@ import org.springframework.web.client.RestTemplate;
 import ru.practicum.dto.EventFullDto;
 import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.NewEventDto;
-import ru.practicum.dto.request.*;
+import ru.practicum.dto.request.EventRequestStatusUpdateRequest;
+import ru.practicum.dto.request.EventRequestStatusUpdateResult;
+import ru.practicum.dto.request.ParticipationRequestDto;
+import ru.practicum.dto.request.UpdateEventAdminRequest;
+import ru.practicum.dto.request.UpdateEventUserRequest;
 import ru.practicum.exceptions.BadRequestException;
 import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.model.Event;
 import ru.practicum.model.ParticipationRequest;
-import ru.practicum.model.User;
 import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.ParticipationRepository;
@@ -23,7 +26,11 @@ import ru.practicum.repository.UserRepository;
 import ru.practicum.service.EventService;
 import ru.practicum.statClient.client.Client;
 import ru.practicum.statDto.dto.ViewStatsDto;
-import ru.practicum.util.*;
+import ru.practicum.util.Constants;
+import ru.practicum.util.EventState;
+import ru.practicum.util.EventsSort;
+import ru.practicum.util.StateActionAdmin;
+import ru.practicum.util.StateActionUser;
 import ru.practicum.util.mapper.EventMapper;
 import ru.practicum.util.mapper.ParticipationRequestMapper;
 
@@ -129,6 +136,7 @@ public class EventServiceImpl implements EventService {
         if (event.getRequestModeration() == null) {
             event.setRequestModeration(true);
         }
+        event.setParticipants(new ArrayList<>());
         Event eventFullDto = eventRepository.save(event);
         log.info("Event with id = {} saved", eventFullDto.getId());
         return EventMapper.toEventFullDto(eventFullDto);

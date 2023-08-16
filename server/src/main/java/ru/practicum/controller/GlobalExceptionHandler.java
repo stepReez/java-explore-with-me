@@ -26,6 +26,7 @@ public class GlobalExceptionHandler {
                 .message(e.getMessage())
                 .status(HttpStatus.NOT_FOUND)
                 .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)))
+                .code(404)
                 .build();
     }
 
@@ -37,6 +38,7 @@ public class GlobalExceptionHandler {
                 .message(e.getMessage())
                 .status(HttpStatus.CONFLICT)
                 .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)))
+                .code(409)
                 .build();
     }
 
@@ -48,6 +50,7 @@ public class GlobalExceptionHandler {
                 .message(e.getMessage())
                 .status(HttpStatus.BAD_REQUEST)
                 .timestamp(LocalDateTime.now().format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)))
+                .code(400)
                 .build();
     }
 }
