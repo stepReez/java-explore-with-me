@@ -10,6 +10,7 @@ import ru.practicum.util.EventState;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
@@ -41,7 +42,7 @@ public class Event {
     @JoinColumn(name = "initiator_id")
     private User initiator;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "location_id")
     private Location location;
 
@@ -54,7 +55,7 @@ public class Event {
     private LocalDateTime publishedOn;
 
     @Column(name = "moderation")
-    private boolean requestModeration;
+    private Boolean requestModeration;
 
     @Enumerated(EnumType.STRING)
     private EventState state;
@@ -64,9 +65,9 @@ public class Event {
     private long views;
 
     @WhereJoinTable(clause = "status='CONFIRMED'")
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinTable(name = "requests",
             joinColumns = @JoinColumn(name = "event_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
-    List<User> participants;
+    private List<User> participants = new ArrayList<>();
 }

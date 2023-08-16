@@ -16,6 +16,7 @@ import ru.practicum.repository.EventRepository;
 import ru.practicum.service.CompilationService;
 import ru.practicum.util.mapper.CompilationMapper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,10 @@ public class CompilationServiceImpl implements CompilationService {
     @Transactional
     public CompilationDto createCompilation(NewCompilationDto newCompilationDto) {
         Compilation compilation = CompilationMapper.toCompilation(newCompilationDto);
-        List<Event> events = eventRepository.findAllById(newCompilationDto.getEvents());
+        List<Event> events = new ArrayList<>();
+        if (newCompilationDto.getEvents() != null) {
+            events = eventRepository.findAllById(newCompilationDto.getEvents());
+        }
         compilation.setEvents(events);
         Compilation compilationDto = compilationRepository.save(compilation);
         log.info("Compilation with id = {} saved", compilationDto.getId());
@@ -43,8 +47,9 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     @Transactional
     public void deleteCompilation(long compId) {
+        log.info("Try to delete compilation {}", compId);
         if (compilationRepository.findById(compId).isEmpty()) {
-            throw new NotFoundException("Compilation not found");
+            throw new NotFoundException(String.format("Compilation with id = %d not found", compId));
         }
         compilationRepository.deleteById(compId);
         log.info("Compilation with id = {} deleted", compId);
@@ -53,8 +58,9 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     @Transactional
     public CompilationDto patchCompilation(long compId, UpdateCompilationRequest updateCompilationRequest) {
+        log.info("Try to get compilation {}", compId);
         Compilation compilation = compilationRepository.findById(compId).orElseThrow(() ->
-                new NotFoundException("Compilation not found"));
+                new NotFoundException(String.format("Compilation with id = %d not found", compId)));
         patch(compilation, updateCompilationRequest);
         compilation.setId(compId);
         Compilation newCompilation = compilationRepository.save(compilation);
@@ -69,8 +75,7 @@ public class CompilationServiceImpl implements CompilationService {
             compilations = compilationRepository.findAll(PageRequest.of(from / size, size))
                     .stream().collect(Collectors.toList());
         } else {
-            compilations = compilationRepository.findAllByPinned(pinned, PageRequest.of(from / size, size))
-                    .stream().collect(Collectors.toList());
+            compilations = new ArrayList<>(compilationRepository.findAllByPinned(pinned, PageRequest.of(from / size, size)));
         }
         log.info("Compilations from {} to {} found", from, from + size);
         return compilations.stream()
@@ -80,6 +85,7 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationDto getCompilation(long compId) {
+        log.info("Try to get compilation {}", compId);
         CompilationDto compilationDto = CompilationMapper.toCompilationDto(compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException(String.format("Compilation with id = %d not found", compId))));
         log.info("Compilation with id = {} found", compId);

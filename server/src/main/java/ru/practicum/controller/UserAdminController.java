@@ -1,19 +1,22 @@
-package ru.practicum.controller.adminController;
+package ru.practicum.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.UserDto;
 import ru.practicum.dto.request.NewUserRequest;
 import ru.practicum.service.UserService;
 
+import javax.validation.Valid;
 import java.util.List;
 
-@Controller
-@RequestMapping(path = "/admin/users")
+@RestController
+@RequestMapping("/admin/users")
 @RequiredArgsConstructor
 public class UserAdminController {
 
+    @Autowired
     private final UserService userService;
 
     @GetMapping
@@ -24,11 +27,13 @@ public class UserAdminController {
     }
 
     @PostMapping
-    public UserDto createUser(@RequestBody NewUserRequest user) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserDto createUser(@Valid @RequestBody NewUserRequest user) {
         return userService.createUser(user);
     }
 
-    @DeleteMapping("/userId")
+    @DeleteMapping("/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable long userId) {
         userService.deleteUser(userId);
     }

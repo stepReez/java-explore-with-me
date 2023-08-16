@@ -12,6 +12,7 @@ import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.ParticipationRepository;
 import ru.practicum.repository.UserRepository;
 import ru.practicum.service.RequestService;
+import ru.practicum.util.EventState;
 import ru.practicum.util.mapper.ParticipationRequestMapper;
 
 import java.time.LocalDateTime;
@@ -40,26 +41,26 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public ParticipationRequestDto createParticipationRequest(long userId, long eventId) {
-        if (!participationRepository.findAllByUserIdAndEventId(userId, eventId).isEmpty()) {
+        if (participationRepository.findAllByUserIdAndEventId(userId, eventId).isPresent()) {
             throw new ConflictException("Request already exist");
         }
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Event not found"));
         if (event.getInitiator().getId() == userId) {
             throw new ConflictException("Requester can't be initiator");
         }
-        if (event.getPublishedOn() == null || event.getPublishedOn().isAfter(LocalDateTime.now())) {
+        if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("Event not published");
         }
-        if (event.getParticipants().size() == event.getParticipantLimit()) {
+        if (event.getParticipantLimit() != 0 && event.getParticipants().size() == event.getParticipantLimit()) {
             throw new ConflictException("Participation limit reached");
         }
         ParticipationRequest participationRequest = ParticipationRequest.builder()
                 .created(LocalDateTime.now())
-                .event(eventRepository.findById(eventId).orElseThrow())
-                .requester(userRepository.findById(userId).orElseThrow())
+                .event(event)
+                .requester(userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found")))
                 .status("PENDING")
                 .build();
-        if (!event.isRequestModeration()) {
+        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
             participationRequest.setStatus("CONFIRMED");
         }
         ParticipationRequest participationRequestDto = participationRepository.save(participationRequest);

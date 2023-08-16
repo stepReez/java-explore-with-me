@@ -1,7 +1,8 @@
-package ru.practicum.controller.privateController;
+package ru.practicum.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.EventFullDto;
 import ru.practicum.dto.EventShortDto;
@@ -12,14 +13,15 @@ import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.dto.request.UpdateEventUserRequest;
 import ru.practicum.service.EventService;
 
+import javax.validation.Valid;
 import java.util.List;
-import java.util.Map;
 
-@Controller
-@RequestMapping(path = "/users/{userId}/events")
+@RestController
+@RequestMapping("/users/{userId}/events")
 @RequiredArgsConstructor
 public class EventPrivateController {
 
+    @Autowired
     private final EventService eventService;
 
     @GetMapping
@@ -30,8 +32,9 @@ public class EventPrivateController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto createEvent(@PathVariable long userId,
-                                    @RequestBody NewEventDto newEventDto) {
+                                    @Valid @RequestBody NewEventDto newEventDto) {
         return eventService.createEvent(userId, newEventDto);
     }
 
@@ -44,7 +47,7 @@ public class EventPrivateController {
     @PatchMapping("/{eventId}")
     public EventFullDto patchEvent(@PathVariable long userId,
                                    @PathVariable long eventId,
-                                   @RequestBody Map<Object, Object> userRequest) {
+                                   @Valid @RequestBody UpdateEventUserRequest userRequest) {
         return eventService.patchEventByUser(userId, eventId, userRequest);
     }
 

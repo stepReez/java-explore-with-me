@@ -1,18 +1,20 @@
-package ru.practicum.controller.privateController;
+package ru.practicum.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.request.ParticipationRequestDto;
 import ru.practicum.service.RequestService;
 
 import java.util.List;
 
-@Controller
-@RequestMapping(path = "/users/{userId}/requests")
+@RestController
+@RequestMapping("/users/{userId}/requests")
 @RequiredArgsConstructor
 public class RequestPrivateController {
 
+    @Autowired
     private final RequestService requestService;
 
     @GetMapping
@@ -21,6 +23,7 @@ public class RequestPrivateController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto createParticipationRequest(@PathVariable long userId,
                                                               @RequestParam long eventId) {
         return requestService.createParticipationRequest(userId, eventId);

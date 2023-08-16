@@ -58,11 +58,12 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public CategoryDto patchCategory(long catId, CategoryDto categoryDto) {
         if (categoryRepository.findAll().stream()
-                .anyMatch((category) -> category.getName().equals(categoryDto.getName()))) {
+                .anyMatch(category -> (category.getName().equals(categoryDto.getName())) &&
+                (category.getId() != catId))) {
             throw new ConflictException("Category with this name already exist");
         }
         Category category = categoryRepository.findById(catId).orElseThrow(() ->
-                new NotFoundException(String.format("Category with id = %d found", catId)));
+                new NotFoundException(String.format("Category with id = %d not found", catId)));
         category.setName(categoryDto.getName());
         category.setId(catId);
         Category newCategory = categoryRepository.save(category);

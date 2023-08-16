@@ -20,38 +20,38 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     @Query("SELECT e FROM Event AS e " +
             "JOIN e.category AS c " +
-            "WHERE lower(e.annotation) LIKE %?1% " +
-            "OR lower(e.title) LIKE %?2% " +
-            "AND c.id IN ?3 " +
-            "AND e.paid LIKE ?4 " +
-            "AND e.eventDate > ?5 " +
-            "AND e.eventDate < ?6 " +
-            "AND e.publishedOn < ?7" +
+            "WHERE ((:text) IS NULL OR lower(e.annotation) LIKE lower(concat('%', :text, '%')) " +
+            "OR lower(e.title) LIKE lower(concat('%', :text, '%'))) " +
+            "AND (:categories IS NULL OR c.id IN :categories) " +
+            "AND e.paid = :paid " +
+            "AND e.eventDate > :rangeStart " +
+            "AND (cast(:rangeEnd as date) IS NULL OR e.eventDate < :rangeEnd) " +
+            "AND e.state = 'PUBLISHED' " +
             "ORDER BY e.eventDate")
-    List<Event> findPublicSortByDate(String text, String text2, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
-                           LocalDateTime rangeEnd, LocalDateTime now, Pageable pageable);
+    List<Event> findPublicSortByDate(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
+                           LocalDateTime rangeEnd, Pageable pageable);
 
     @Query("SELECT e FROM Event AS e " +
             "JOIN e.category AS c " +
-            "WHERE lower(e.annotation) LIKE %?1% " +
-            "OR lower(e.title) LIKE %?2% " +
-            "AND c.id IN ?3 " +
-            "AND e.paid LIKE ?4 " +
-            "AND e.eventDate > ?5 " +
-            "AND e.eventDate < ?6 " +
-            "AND e.publishedOn < ?7" +
+            "WHERE ((:text) IS NULL OR lower(e.annotation) LIKE lower(concat('%', :text, '%')) " +
+            "OR lower(e.title) LIKE lower(concat('%', :text, '%'))) " +
+            "AND (:categories IS NULL OR c.id IN :categories) " +
+            "AND e.paid = :paid " +
+            "AND e.eventDate > :rangeStart " +
+            "AND (cast(:rangeEnd as date) IS NULL OR e.eventDate < :rangeEnd) " +
+            "AND e.state = 'PUBLISHED' " +
             "ORDER BY e.views DESC")
-    List<Event> findPublicSortByViews(String text, String text2, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
-                                     LocalDateTime rangeEnd, LocalDateTime now, Pageable pageable);
+    List<Event> findPublicSortByViews(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
+                                     LocalDateTime rangeEnd, Pageable pageable);
 
     @Query("SELECT e FROM Event AS e " +
             "JOIN e.category AS c " +
             "JOIN e.initiator AS u " +
-            "WHERE u.id IN ?1 " +
-            "AND e.state IN ?2 " +
-            "AND c.id IN ?3 " +
-            "AND e.eventDate > ?4 " +
-            "AND e.eventDate < ?5")
+            "WHERE ((:users) IS NULL OR u.id IN :users) " +
+            "AND ((:states) IS NULL OR e.state IN :states) " +
+            "AND ((:categories) IS NULL OR c.id IN :categories) " +
+            "AND e.eventDate > :rangeStart " +
+            "AND (cast(:rangeEnd as date) IS NULL OR e.eventDate < :rangeEnd)")
     List<Event> findAdmin(List<Long> users, List<EventState> states, List<Long> categories,
                           LocalDateTime rangeStart, LocalDateTime rangeEnd, Pageable pageable);
 

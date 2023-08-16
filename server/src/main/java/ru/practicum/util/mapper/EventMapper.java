@@ -5,10 +5,12 @@ import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.NewEventDto;
 import ru.practicum.model.Category;
 import ru.practicum.model.Event;
+import ru.practicum.model.User;
 import ru.practicum.util.Constants;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class EventMapper {
 
@@ -38,7 +40,7 @@ public class EventMapper {
                 .location(newEventDto.getLocation())
                 .paid(newEventDto.isPaid())
                 .participantLimit(newEventDto.getParticipantLimit())
-                .requestModeration(newEventDto.isRequestModeration())
+                .requestModeration(newEventDto.getRequestModeration())
                 .title(newEventDto.getTitle())
                 .build();
     }
@@ -55,12 +57,11 @@ public class EventMapper {
                 .location(event.getLocation())
                 .paid(event.isPaid())
                 .participantLimit(event.getParticipantLimit())
-                .publishedOn(event.getPublishedOn().format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)))
-                .requestModeration(event.isRequestModeration())
+                .publishedOn(event.getCreated().format(DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)))
+                .requestModeration(event.getRequestModeration())
                 .state(event.getState())
                 .title(event.getTitle())
                 .views(event.getViews())
-                .confirmedRequests(event.getParticipants().size())
                 .build();
 
     }

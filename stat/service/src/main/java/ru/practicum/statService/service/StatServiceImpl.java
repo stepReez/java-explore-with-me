@@ -19,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -68,6 +69,7 @@ public class StatServiceImpl implements StatService {
                 log.info("Stats between {} and {} found", startDate, endDate);
             }
         } else {
+            uris = uris.stream().map(x -> URLDecoder.decode(x, StandardCharsets.UTF_8)).collect(Collectors.toList());
             parameters.addValue("uris", uris);
             if (unique) {
                 viewStats = namedJdbcTemplate.query(
