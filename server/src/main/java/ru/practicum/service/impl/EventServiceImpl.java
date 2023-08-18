@@ -19,15 +19,13 @@ import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.model.Category;
 import ru.practicum.model.Event;
 import ru.practicum.model.ParticipationRequest;
-import ru.practicum.repository.CategoryRepository;
-import ru.practicum.repository.EventRepository;
-import ru.practicum.repository.ParticipationRepository;
-import ru.practicum.repository.UserRepository;
+import ru.practicum.repository.*;
 import ru.practicum.service.EventService;
 import ru.practicum.util.Constants;
 import ru.practicum.util.EventState;
 import ru.practicum.util.EventsSort;
 
+import ru.practicum.util.mapper.CommentMapper;
 import ru.practicum.util.mapper.EventMapper;
 import ru.practicum.util.mapper.ParticipationRequestMapper;
 
@@ -54,6 +52,8 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
 
     private final ParticipationRepository participationRepository;
+
+    private final CommentRepository commentRepository;
 
     private final StatServiceImpl statService;
 
@@ -136,6 +136,9 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEventByUser(long userId, long eventId) {
         EventFullDto eventFullDto = EventMapper.toEventFullDto(eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException(String.format("Event with id = %d found", eventId))));
+        eventFullDto.setComments(commentRepository.findCommentsByEvent(eventId).stream()
+                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList()));
         log.info("Event with id = {} found", eventId);
         return eventFullDto;
     }
