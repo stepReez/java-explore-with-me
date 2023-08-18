@@ -58,10 +58,10 @@ public class RequestServiceImpl implements RequestService {
                 .created(LocalDateTime.now())
                 .event(event)
                 .requester(userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found")))
-                .status("PENDING")
+                .status(EventState.PENDING.toString())
                 .build();
         if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
-            participationRequest.setStatus("CONFIRMED");
+            participationRequest.setStatus(EventState.CONFIRMED.toString());
         }
         ParticipationRequest participationRequestDto = participationRepository.save(participationRequest);
         log.info("Participation requests with id = {} saved", participationRequestDto.getId());
@@ -73,7 +73,7 @@ public class RequestServiceImpl implements RequestService {
         ParticipationRequest participationRequest = participationRepository.findById(requestId).orElseThrow(() ->
                 new NotFoundException("Request not found"));
         if (participationRequest.getRequester().getId() == userId) {
-            participationRequest.setStatus("CANCELED");
+            participationRequest.setStatus(EventState.CANCELED.toString());
         }
         ParticipationRequest participationRequestDto = participationRepository.save(participationRequest);
         log.info("Participation requests with id = {} canceled", requestId);

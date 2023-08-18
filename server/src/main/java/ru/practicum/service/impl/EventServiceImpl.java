@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 import ru.practicum.dto.EventFullDto;
 import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.NewEventDto;
@@ -17,6 +16,7 @@ import ru.practicum.dto.request.UpdateEventUserRequest;
 import ru.practicum.exceptions.BadRequestException;
 import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.NotFoundException;
+import ru.practicum.model.Category;
 import ru.practicum.model.Event;
 import ru.practicum.model.ParticipationRequest;
 import ru.practicum.repository.CategoryRepository;
@@ -24,16 +24,14 @@ import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.ParticipationRepository;
 import ru.practicum.repository.UserRepository;
 import ru.practicum.service.EventService;
-import ru.practicum.statClient.client.Client;
-import ru.practicum.statDto.dto.ViewStatsDto;
 import ru.practicum.util.Constants;
 import ru.practicum.util.EventState;
 import ru.practicum.util.EventsSort;
-import ru.practicum.util.StateActionAdmin;
-import ru.practicum.util.StateActionUser;
+
 import ru.practicum.util.mapper.EventMapper;
 import ru.practicum.util.mapper.ParticipationRequestMapper;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -57,27 +55,13 @@ public class EventServiceImpl implements EventService {
 
     private final ParticipationRepository participationRepository;
 
+    private final StatServiceImpl statService;
+
     @Override
     public List<EventFullDto> getEvents(List<Long> users, List<EventState> states, List<Long> categories,
                                         String rangeStart, String rangeEnd, int from, int size) {
-        LocalDateTime startDate;
-        LocalDateTime endDate;
-        if (rangeStart == null || rangeStart.isBlank()) {
-            startDate = LocalDateTime.now();
-        } else {
-            startDate = LocalDateTime.parse(
-                    URLDecoder.decode(rangeStart, StandardCharsets.UTF_8),
-                    DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)
-            );
-        }
-        if (rangeEnd == null || rangeEnd.isBlank()) {
-            endDate = null;
-        } else {
-            endDate = LocalDateTime.parse(
-                    URLDecoder.decode(rangeEnd, StandardCharsets.UTF_8),
-                    DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)
-            );
-        }
+        LocalDateTime startDate = getStartDate(rangeStart);
+        LocalDateTime endDate = getEndDate(rangeEnd);
         if (endDate != null && endDate.isBefore(startDate)) {
             throw new BadRequestException("End of range cant be before start");
         }
@@ -92,11 +76,17 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto patchEvent(long eventId, UpdateEventAdminRequest updateEvent) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Event not found"));
-        if (event.getEventDate().minusHours(1).isBefore(LocalDateTime.now())) {
+        if (event.getEventDate().minusHours(Constants.MINUS_ONE_HOUR).isBefore(LocalDateTime.now())) {
             throw new ConflictException("Less than an hour left before the event");
         }
         EventState state = event.getState();
-        patch(event, updateEvent);
+        Category category = null;
+        if (!(updateEvent.getCategory() == null)) {
+            category = categoryRepository.findById(updateEvent.getCategory()).orElseThrow(() ->
+                    new NotFoundException("Category not found"));
+        }
+        EventMapper.patch(event, updateEvent, category);
+        log.info(event.toString());
         if (!state.equals(EventState.PENDING) && event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("Event not pending");
         }
@@ -126,7 +116,7 @@ public class EventServiceImpl implements EventService {
         Event event = EventMapper.toEvent(newEventDto,
                 categoryRepository.findById(newEventDto.getCategory()).orElseThrow(() ->
                         new NotFoundException("Category not found")));
-        if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+        if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(Constants.PLUS_TWO_HOURS))) {
             throw new BadRequestException("The date and time for which the event is scheduled cannot be earlier" +
                     " than two hours from the current moment");
         }
@@ -161,10 +151,16 @@ public class EventServiceImpl implements EventService {
                     " than two hours from the current moment");
         }
         if (userRequest.getEventDate() != null && LocalDateTime.parse(userRequest.getEventDate(),
-                DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)).isBefore(LocalDateTime.now().plusHours(2))) {
+                DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT))
+                .isBefore(LocalDateTime.now().plusHours(Constants.PLUS_TWO_HOURS))) {
             throw new BadRequestException("The start of the event cannot be in the past");
         }
-        patch(event, userRequest);
+        Category category = null;
+        if (!(userRequest.getCategory() == null)) {
+            category = categoryRepository.findById(userRequest.getCategory()).orElseThrow(() ->
+                    new NotFoundException("Category not found"));
+        }
+        EventMapper.patch(event, userRequest, category);
         Event newEvent = eventRepository.save(event);
         log.info("Event with id = {} saved", eventId);
         return EventMapper.toEventFullDto(newEvent);
@@ -181,7 +177,6 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    @Transactional
     public EventRequestStatusUpdateResult patchParticipation(long userId, long eventId,
                                                              EventRequestStatusUpdateRequest statusUpdateRequest) {
         List<Long> ids = statusUpdateRequest.getRequestIds();
@@ -198,12 +193,6 @@ public class EventServiceImpl implements EventService {
             }
             request.setStatus(statusUpdateRequest.getStatus().toString());
             participationRepository.save(request);
-//            if (statusUpdateRequest.getStatus().toString().equals("CONFIRMED")) {
-//                List<User> users = event.getParticipants();
-//                users.add(request.getRequester());
-//                event.setParticipants(users);
-//                eventRepository.save(event);
-//            }
         });
 
         EventRequestStatusUpdateResult eventRequestStatusUpdateResult = new EventRequestStatusUpdateResult();
@@ -229,25 +218,9 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getEventsPublic(String text, List<Long> categories, Boolean paid, String rangeStart,
                                                String rangeEnd, boolean onlyAvailable, EventsSort sort,
-                                               int from, int size) {
-        LocalDateTime startDate;
-        LocalDateTime endDate;
-        if (rangeStart == null || rangeStart.isBlank()) {
-            startDate = LocalDateTime.now().minusMinutes(10);
-        } else {
-            startDate = LocalDateTime.parse(
-                    URLDecoder.decode(rangeStart, StandardCharsets.UTF_8),
-                    DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)
-            );
-        }
-        if (rangeEnd == null || rangeEnd.isBlank()) {
-            endDate = null;
-        } else {
-            endDate = LocalDateTime.parse(
-                    URLDecoder.decode(rangeEnd, StandardCharsets.UTF_8),
-                    DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)
-            );
-        }
+                                               int from, int size, HttpServletRequest request) {
+        LocalDateTime startDate = getStartDate(rangeStart);
+        LocalDateTime endDate = getEndDate(rangeEnd);
         if (endDate != null && endDate.isBefore(startDate)) {
             throw new BadRequestException("End of range cant be before start");
         }
@@ -273,11 +246,12 @@ public class EventServiceImpl implements EventService {
             eventShortDtoList.add(null);
         }
         log.info("All necessary events found");
+        statService.postHit("GetEvents", request);
         return eventShortDtoList;
     }
 
     @Override
-    public EventFullDto getEventPublic(long id) {
+    public EventFullDto getEventPublic(long id, HttpServletRequest request) {
         Optional<Event> event = eventRepository.findById(id);
         if (event.isEmpty() || !event.get().getState().equals(EventState.PUBLISHED)) {
            throw new NotFoundException(String.format("Event with id = %d found", id));
@@ -285,66 +259,37 @@ public class EventServiceImpl implements EventService {
         Event eventView = event.get();
         ArrayList<String> uri = new ArrayList<>();
         uri.add("/events/" + id);
-        long views = getViews(uri);
+        long views = statService.getViews(uri);
         eventView.setViews(views);
         EventFullDto eventFullDto = EventMapper.toEventFullDto(eventRepository.save(eventView));
         log.info("Event with id = {} found", id);
+        statService.postHit("GetEvent", request);
         return eventFullDto;
     }
 
-    private void patch(Event event, UpdateEventUserRequest userRequest) {
-        Optional.ofNullable(userRequest.getEventDate()).ifPresent(eventDate -> event.setEventDate(LocalDateTime.parse(
-                eventDate,
-                DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)
-        )));
-        Optional.ofNullable(userRequest.getPaid()).ifPresent(event::setPaid);
-        Optional.ofNullable(userRequest.getDescription()).ifPresent(event::setDescription);
-        Optional.ofNullable(userRequest.getParticipantLimit()).ifPresent(event::setParticipantLimit);
-        Optional.ofNullable(userRequest.getAnnotation()).ifPresent(event::setAnnotation);
-        Optional.ofNullable(userRequest.getTitle()).ifPresent(event::setTitle);
-        Optional.ofNullable(userRequest.getCategory()).ifPresent(categoryId ->
-                event.setCategory(categoryRepository.findById(categoryId).orElseThrow(() ->
-                new NotFoundException("Category notFound"))));
-        Optional.ofNullable(userRequest.getRequestModeration()).ifPresent(event::setRequestModeration);
-        Optional.ofNullable(userRequest.getStateAction()).ifPresent(actionState -> {
-            if (actionState.equals(StateActionUser.SEND_TO_REVIEW)) {
-                event.setState(EventState.PENDING);
-            } else {
-                event.setState(EventState.CANCELED);
-            }
-        });
-        Optional.ofNullable(userRequest.getLocation()).ifPresent(event::setLocation);
+    private LocalDateTime getStartDate(String rangeStart) {
+        LocalDateTime startDate;
+        if (rangeStart == null || rangeStart.isBlank()) {
+            startDate = LocalDateTime.now();
+        } else {
+            startDate = LocalDateTime.parse(
+                    URLDecoder.decode(rangeStart, StandardCharsets.UTF_8),
+                    DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)
+            );
+        }
+        return startDate;
     }
 
-    private void patch(Event event, UpdateEventAdminRequest userRequest) {
-        Optional.ofNullable(userRequest.getEventDate()).ifPresent(eventDate -> event.setEventDate(LocalDateTime.parse(
-                eventDate,
-                DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)
-        )));
-        Optional.ofNullable(userRequest.getPaid()).ifPresent(event::setPaid);
-        Optional.ofNullable(userRequest.getDescription()).ifPresent(event::setDescription);
-        Optional.ofNullable(userRequest.getParticipantLimit()).ifPresent(event::setParticipantLimit);
-        Optional.ofNullable(userRequest.getAnnotation()).ifPresent(event::setAnnotation);
-        Optional.ofNullable(userRequest.getTitle()).ifPresent(event::setTitle);
-        Optional.ofNullable(userRequest.getCategory()).ifPresent(categoryId ->
-                event.setCategory(categoryRepository.findById(categoryId).orElseThrow(() ->
-                        new NotFoundException("Category notFound"))));
-        Optional.ofNullable(userRequest.getRequestModeration()).ifPresent(event::setRequestModeration);
-        Optional.ofNullable(userRequest.getStateAction()).ifPresent(actionState -> {
-            if (actionState.equals(StateActionAdmin.PUBLISH_EVENT)) {
-                event.setState(EventState.PUBLISHED);
-            } else {
-                event.setState(EventState.CANCELED);
-            }
-        });
-        Optional.ofNullable(userRequest.getLocation()).ifPresent(event::setLocation);
-    }
-
-    private long getViews(ArrayList<String> uris) {
-        Client client = new Client(new RestTemplate());
-        List<ViewStatsDto> viewStats = client.getStats(LocalDateTime.now().minusYears(100),
-                LocalDateTime.now().plusYears(100), uris, true);
-        log.info(viewStats.toString());
-        return viewStats.size();
+    private LocalDateTime getEndDate(String rangeEnd) {
+        LocalDateTime endDate;
+        if (rangeEnd == null || rangeEnd.isBlank()) {
+            endDate = null;
+        } else {
+            endDate = LocalDateTime.parse(
+                    URLDecoder.decode(rangeEnd, StandardCharsets.UTF_8),
+                    DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)
+            );
+        }
+        return endDate;
     }
 }

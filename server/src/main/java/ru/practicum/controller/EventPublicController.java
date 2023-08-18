@@ -2,21 +2,17 @@ package ru.practicum.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 import ru.practicum.dto.EventFullDto;
 import ru.practicum.dto.EventShortDto;
 import ru.practicum.service.EventService;
-import ru.practicum.statClient.client.Client;
 import ru.practicum.util.EventsSort;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -25,7 +21,6 @@ import java.util.List;
 @Slf4j
 public class EventPublicController {
 
-    @Autowired
     private final EventService eventService;
 
     @GetMapping
@@ -39,20 +34,12 @@ public class EventPublicController {
                                          @RequestParam(defaultValue = "0") int from,
                                          @RequestParam(defaultValue = "10") int size,
                                          HttpServletRequest request) {
-        Client client = new Client(new RestTemplate());
-        client.postHit("GetEvents", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
-        log.info(request.getRequestURI());
-        log.info(request.getRemoteAddr());
         return eventService.getEventsPublic(text, categories, paid, rangeStart, rangeEnd,
-                                            onlyAvailable, sort, from, size);
+                                            onlyAvailable, sort, from, size, request);
     }
 
     @GetMapping("/{id}")
     public EventFullDto getEvent(@PathVariable long id, HttpServletRequest request) {
-        Client client = new Client(new RestTemplate());
-        client.postHit("GetEvent", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
-        log.info(request.getRequestURI());
-        log.info(request.getRemoteAddr());
-        return eventService.getEventPublic(id);
+        return eventService.getEventPublic(id, request);
     }
 }

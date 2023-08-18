@@ -31,7 +31,6 @@ public class CompilationServiceImpl implements CompilationService {
     private final EventRepository eventRepository;
 
     @Override
-    @Transactional
     public CompilationDto createCompilation(NewCompilationDto newCompilationDto) {
         Compilation compilation = CompilationMapper.toCompilation(newCompilationDto);
         List<Event> events = new ArrayList<>();
@@ -45,7 +44,6 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    @Transactional
     public void deleteCompilation(long compId) {
         log.info("Try to delete compilation {}", compId);
         if (compilationRepository.findById(compId).isEmpty()) {
@@ -56,12 +54,15 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    @Transactional
     public CompilationDto patchCompilation(long compId, UpdateCompilationRequest updateCompilationRequest) {
         log.info("Try to get compilation {}", compId);
         Compilation compilation = compilationRepository.findById(compId).orElseThrow(() ->
                 new NotFoundException(String.format("Compilation with id = %d not found", compId)));
-        patch(compilation, updateCompilationRequest);
+        List<Event> events = null;
+            if (updateCompilationRequest.getEvents() != null) {
+                events = eventRepository.findAllById(updateCompilationRequest.getEvents());
+            }
+        CompilationMapper.patch(compilation, updateCompilationRequest, events);
         compilation.setId(compId);
         Compilation newCompilation = compilationRepository.save(compilation);
         log.info("Compilation with id = {} patched", compId);
@@ -90,17 +91,5 @@ public class CompilationServiceImpl implements CompilationService {
                 .orElseThrow(() -> new NotFoundException(String.format("Compilation with id = %d not found", compId))));
         log.info("Compilation with id = {} found", compId);
         return compilationDto;
-    }
-
-    private void patch(Compilation oldComp, UpdateCompilationRequest newComp) {
-        if (newComp.getTitle() != null) {
-            oldComp.setTitle(newComp.getTitle());
-        }
-        if (newComp.getEvents() != null) {
-            oldComp.setEvents(eventRepository.findAllById(newComp.getEvents()));
-        }
-        if (newComp.getPinned() != null) {
-            oldComp.setPinned(newComp.getPinned());
-        }
     }
 }

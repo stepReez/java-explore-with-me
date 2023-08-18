@@ -2,8 +2,11 @@ package ru.practicum.util.mapper;
 
 import ru.practicum.dto.CompilationDto;
 import ru.practicum.dto.NewCompilationDto;
+import ru.practicum.dto.request.UpdateCompilationRequest;
 import ru.practicum.model.Compilation;
+import ru.practicum.model.Event;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class CompilationMapper {
@@ -23,5 +26,17 @@ public class CompilationMapper {
                         .map(EventMapper::toShortDto)
                         .collect(Collectors.toList()))
                 .build();
+    }
+
+    public static void patch(Compilation oldComp, UpdateCompilationRequest newComp, List<Event> events) {
+        if (newComp.getTitle() != null) {
+            oldComp.setTitle(newComp.getTitle());
+        }
+        if (newComp.getEvents() != null) {
+            oldComp.setEvents(events);
+        }
+        if (newComp.getPinned() != null) {
+            oldComp.setPinned(newComp.getPinned());
+        }
     }
 }

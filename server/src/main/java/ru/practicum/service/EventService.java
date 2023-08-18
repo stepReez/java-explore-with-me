@@ -11,6 +11,7 @@ import ru.practicum.dto.request.UpdateEventUserRequest;
 import ru.practicum.util.EventState;
 import ru.practicum.util.EventsSort;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface EventService {
@@ -45,7 +46,8 @@ public interface EventService {
                                         boolean onlyAvailable,
                                         EventsSort sort,
                                         int from,
-                                        int size);
+                                        int size,
+                                        HttpServletRequest request);
 
-    EventFullDto getEventPublic(long id);
+    EventFullDto getEventPublic(long id, HttpServletRequest request);
 }

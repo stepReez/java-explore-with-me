@@ -30,7 +30,6 @@ public class CategoryServiceImpl implements CategoryService {
     private final EventRepository eventRepository;
 
     @Override
-    @Transactional
     public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
         if (categoryRepository.findAll().stream()
                 .anyMatch((category) -> category.getName().equals(newCategoryDto.getName()))) {
@@ -42,7 +41,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Transactional
     public void deleteCategory(long catId) {
         if (categoryRepository.findById(catId).isEmpty()) {
             throw new NotFoundException("Category not found");
@@ -55,7 +53,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Transactional
     public CategoryDto patchCategory(long catId, CategoryDto categoryDto) {
         if (categoryRepository.findAll().stream()
                 .anyMatch(category -> (category.getName().equals(categoryDto.getName())) &&
