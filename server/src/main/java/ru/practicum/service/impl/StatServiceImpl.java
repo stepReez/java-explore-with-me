@@ -26,9 +26,9 @@ public class StatServiceImpl implements StatService {
     }
 
     @Override
-    public long getViews(ArrayList<String> uris) {
+    public long getViews(List<String> uris) {
         List<ViewStatsDto> viewStats = client.getStats(LocalDateTime.now().minusYears(Constants.PLUS_MINUS_100_YEARS),
-                LocalDateTime.now().plusYears(Constants.PLUS_MINUS_100_YEARS), uris, true);
+                LocalDateTime.now().plusYears(Constants.PLUS_MINUS_100_YEARS), (ArrayList<String>) uris, true);
         log.info(viewStats.toString());
         return viewStats.size();
     }

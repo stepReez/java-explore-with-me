@@ -257,7 +257,7 @@ public class EventServiceImpl implements EventService {
            throw new NotFoundException(String.format("Event with id = %d found", id));
         }
         Event eventView = event.get();
-        ArrayList<String> uri = new ArrayList<>();
+        List<String> uri = new ArrayList<>();
         uri.add("/events/" + id);
         long views = statService.getViews(uri);
         eventView.setViews(views);
