@@ -18,6 +18,7 @@ import java.util.List;
 public class StatServiceImpl implements StatService {
 
     private final Client client = new Client(new RestTemplate());
+
     @Override
     public void postHit(String service, HttpServletRequest request) {
         client.postHit("GetEvents", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now());
