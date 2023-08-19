@@ -8,10 +8,12 @@ import ru.practicum.dto.CommentDto;
 import ru.practicum.exceptions.BadRequestException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.model.Comment;
+import ru.practicum.model.Event;
 import ru.practicum.repository.CommentRepository;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.UserRepository;
 import ru.practicum.service.CommentService;
+import ru.practicum.util.EventState;
 import ru.practicum.util.mapper.CommentMapper;
 
 import java.time.LocalDateTime;
@@ -31,10 +33,14 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDto createComment(CommentDto commentDto, long userId, long eventId) {
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Event not found"));
+        if (!event.getState().equals(EventState.PUBLISHED)) {
+            throw new BadRequestException("Event must be published");
+        }
         Comment comment = CommentMapper.toComment(
                 commentDto,
                 userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found")),
-                eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Event not found"))
+                event
         );
         comment.setCreated(LocalDateTime.now());
         CommentDto commentDtoRet = CommentMapper.toCommentDto(commentRepository.save(comment));
@@ -53,7 +59,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<CommentDto> getCommentsByUser(long userId) {
-        List<CommentDto> commentDtoList = commentRepository.findCommentsByUser(userId).stream()
+        List<CommentDto> commentDtoList = commentRepository.getCommentsByUserId(userId).stream()
                 .map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList());
         log.info("Comments for user {} found", userId);
@@ -61,7 +67,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void deleteCommentByUser(CommentDto commentDto, long userId, long comId) {
+    public void deleteCommentByUser(long userId, long comId) {
         checkSender(userId, comId);
         commentRepository.deleteById(comId);
         log.info("Comment with id = {} deleted", comId);

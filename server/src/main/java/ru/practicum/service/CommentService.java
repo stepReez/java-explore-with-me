@@ -11,7 +11,7 @@ public interface CommentService {
 
     List<CommentDto> getCommentsByUser(long userId);
 
-    void deleteCommentByUser(CommentDto commentDto, long userId, long comId);
+    void deleteCommentByUser(long userId, long comId);
 
     CommentDto getCommentById(long userId, long comId);
 

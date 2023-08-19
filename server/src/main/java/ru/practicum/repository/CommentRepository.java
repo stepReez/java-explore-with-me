@@ -10,13 +10,13 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    @Query("SELECT c FROM Comments AS c " +
+    @Query("SELECT c FROM Comment AS c " +
             "JOIN c.sender AS u " +
-            "WHERE u.id = :userId")
-    List<Comment> findCommentsByUser(long userId);
+            "WHERE u.id = ?1")
+    List<Comment> getCommentsByUserId(Long userId);
 
-    @Query("SELEVT c FROM Comments AS c " +
+    @Query("SELECT c FROM Comment AS c " +
             "JOIN c.event AS e " +
-            "WHERE e.id = :eventId")
-    List<Comment> findCommentsByEvent(long eventId);
+            "WHERE e.id = ?1")
+    List<Comment> getCommentsByEventId(Long eventId);
 }

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.dto.CommentDto;
 import ru.practicum.dto.EventFullDto;
 import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.NewEventDto;
@@ -136,9 +137,6 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEventByUser(long userId, long eventId) {
         EventFullDto eventFullDto = EventMapper.toEventFullDto(eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException(String.format("Event with id = %d found", eventId))));
-        eventFullDto.setComments(commentRepository.findCommentsByEvent(eventId).stream()
-                .map(CommentMapper::toCommentDto)
-                .collect(Collectors.toList()));
         log.info("Event with id = {} found", eventId);
         return eventFullDto;
     }
@@ -265,6 +263,11 @@ public class EventServiceImpl implements EventService {
         long views = statService.getViews(uri);
         eventView.setViews(views);
         EventFullDto eventFullDto = EventMapper.toEventFullDto(eventRepository.save(eventView));
+        List<CommentDto> comments = commentRepository.getCommentsByEventId(id).stream()
+                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList());
+        log.info("Comments size = {}", comments.size());
+        eventFullDto.setComments(comments);
         log.info("Event with id = {} found", id);
         statService.postHit("GetEvent", request);
         return eventFullDto;

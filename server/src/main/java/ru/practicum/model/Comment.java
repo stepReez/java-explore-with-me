@@ -14,11 +14,12 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-@Entity(name = "comments")
+@Entity
+@Table(name = "comments")
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     private String message;
 

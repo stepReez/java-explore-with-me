@@ -23,10 +23,6 @@ public class CommentMapper {
     public static Comment toComment(CommentDto commentDto, User user, Event event) {
         return Comment.builder()
                 .id(commentDto.getId())
-                .created(LocalDateTime.parse(
-                        commentDto.getCreated(),
-                        DateTimeFormatter.ofPattern(Constants.DATE_TIME_FORMAT)
-                ))
                 .message(commentDto.getMessage())
                 .sender(user)
                 .event(event)
