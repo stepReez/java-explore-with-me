@@ -211,7 +211,7 @@
 								},
 								{
 									"key": "comId",
-									"value": "{{eventId}}"
+									"value": "{{comId}}"
 								}
 							]
 						}
@@ -327,7 +327,7 @@
 								},
 								{
 									"key": "comId",
-									"value": "{{eventId}}"
+									"value": "{{comId}}"
 								}
 							]
 						}
@@ -991,7 +991,7 @@
 								},
 								{
 									"key": "comId",
-									"value": "{{eventId}}"
+									"value": "{{comId}}"
 								}
 							]
 						}
