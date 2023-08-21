@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.dto.CommentDto;
 import ru.practicum.dto.EventFullDto;
 import ru.practicum.dto.EventShortDto;
 import ru.practicum.dto.NewEventDto;
@@ -19,15 +20,13 @@ import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.model.Category;
 import ru.practicum.model.Event;
 import ru.practicum.model.ParticipationRequest;
-import ru.practicum.repository.CategoryRepository;
-import ru.practicum.repository.EventRepository;
-import ru.practicum.repository.ParticipationRepository;
-import ru.practicum.repository.UserRepository;
+import ru.practicum.repository.*;
 import ru.practicum.service.EventService;
 import ru.practicum.util.Constants;
 import ru.practicum.util.EventState;
 import ru.practicum.util.EventsSort;
 
+import ru.practicum.util.mapper.CommentMapper;
 import ru.practicum.util.mapper.EventMapper;
 import ru.practicum.util.mapper.ParticipationRequestMapper;
 
@@ -54,6 +53,8 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
 
     private final ParticipationRepository participationRepository;
+
+    private final CommentRepository commentRepository;
 
     private final StatServiceImpl statService;
 
@@ -262,6 +263,11 @@ public class EventServiceImpl implements EventService {
         long views = statService.getViews(uri);
         eventView.setViews(views);
         EventFullDto eventFullDto = EventMapper.toEventFullDto(eventRepository.save(eventView));
+        List<CommentDto> comments = commentRepository.getCommentsByEventId(id).stream()
+                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList());
+        log.info("Comments size = {}", comments.size());
+        eventFullDto.setComments(comments);
         log.info("Event with id = {} found", id);
         statService.postHit("GetEvent", request);
         return eventFullDto;
